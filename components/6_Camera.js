@@ -56,6 +56,27 @@ export default () => {
     }
   };
 
+  /* 
+    The last thing we need to do is actually identify the image with our api. 
+    The URI isn't what we need, we need the base64 image information XXXX
+
+    Now we're going to create a function for identifying the Image ALPHA
+    We are going send this function two things,
+    first, our image file
+    second, a callback function.
+
+    Usually it is a good idea to do our API calls in a separate file to keep ourselves sane.
+    So we send the separate component a callback function so it can send data back from the api call. BRAVO
+    ((Go to create identifyimage.js ))
+    
+    Back to our Camera component.
+
+    Now we'll test.
+
+    Voila Working APP!
+
+  */
+
   return (
     <View style={styles.centeredView}>
       <Camera 

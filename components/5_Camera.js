@@ -2,13 +2,12 @@ import React, {useEffect, useState} from 'react';
 import { Text, View, StyleSheet, ActivityIndicator, Modal, TouchableHighlight } from 'react-native';
 import { Camera } from 'expo-camera';
 import CaptureButton from './CaptureButton'
-import identifyImage from '../apis/identifyImage'; // BRAVO
 
 export default () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false); // ADD THIS LINE
-  const [identifiedImg, setIdentifiedImg] = useState(null);
+  const [tempUri, setTempUri] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -25,10 +24,6 @@ export default () => {
     return <Text>No access to camera</Text>;
   }
 
-  const displayAnswer = (idedImg) => { // BRAVO
-    setIdentifiedImg(idedImg)
-    setModalVisible(true)
-  }
 
   const snap = async () => {
     if (this.camera) {
@@ -37,13 +32,13 @@ export default () => {
       this.camera.takePictureAsync({base64: true})
       .then( photo => {
         this.camera.pausePreview();
-        let { base64 } = photo; // XX
-        return base64 // XX
+        let { uri } = photo;
+        return uri
       })
-      .then((base64) => { // XX
-        identifyImage(base64, displayAnswer); // ALPHA
-        // setIdentifiedImg(uri) // ALPHA
-        // setModalVisible(true); // BRAVO
+      .then((uri) => {
+        // console.log('uri is ', uri)
+        setTempUri(uri) // <----- Don't forget these two lines
+        setModalVisible(true);
 
         this.camera.resumePreview();
         setLoading(false);
@@ -55,6 +50,21 @@ export default () => {
       });
     }
   };
+
+  /* 
+    What's left to do? Send the image to our api for identificaiton, accept back that id, and display in on the screen.
+
+    Let's start with displaying it on the screen.
+    There are a number of different modal libraries in react, but we'll use the Expo version for now.
+    You can pull up the expo modal api if you want, but I have it here.
+
+    Modal should be type slyde, transparent is true and
+    visible we need to create a new state variable to manage that. So let's do that.
+
+    Now we need to control the modal with state, and not forget to show the modal at the right time
+    We'll create a temporary state variable to store the URI so we have something to show
+    We'll use a tertiary statementment as a shorthand if-then statement.
+  */
 
   return (
     <View style={styles.centeredView}>
@@ -80,7 +90,7 @@ export default () => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              {identifiedImg ? identifiedImg : "Can't ID this one!"}
+              {tempUri ? tempUri : "Can't ID this one!"}
             </Text>
 
             <TouchableHighlight
@@ -109,7 +119,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalView: {
+  modalView: { // ADD modalView, Open Button, modal text
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
